@@ -96,7 +96,7 @@ def login():
 def start_scraping():
     global scraper_instance, scraping_thread
     
-    if not session.get('logged_in'):
+    if not session.get('logged_in') or udemy_instance is None:
         return jsonify({'success': False, 'message': 'Please login first'})
     
     try:
@@ -107,16 +107,28 @@ def start_scraping():
         
         def scraping_worker():
             try:
+                # Check if udemy_instance exists
+                if udemy_instance is None:
+                    socketio.emit('scraping_error', {'message': 'Please login first'})
+                    return
+                
                 # Process all selected sites but limit data per site
                 scraper_instance.sites = selected_sites
                 
                 scraped_data = scraper_instance.get_scraped_courses(scrape_site_worker)
-                udemy_instance.scraped_data = scraped_data[:200]  # Limit to 200 courses
-                
-                socketio.emit('scraping_complete', {
-                    'total_courses': len(udemy_instance.scraped_data),
-                    'message': f'Found {len(udemy_instance.scraped_data)} courses'
-                })
+                if scraped_data:
+                    udemy_instance.scraped_data = scraped_data[:200]  # Limit to 200 courses
+                    
+                    socketio.emit('scraping_complete', {
+                        'total_courses': len(udemy_instance.scraped_data),
+                        'message': f'Found {len(udemy_instance.scraped_data)} courses'
+                    })
+                else:
+                    udemy_instance.scraped_data = []
+                    socketio.emit('scraping_complete', {
+                        'total_courses': 0,
+                        'message': 'No courses found'
+                    })
             except Exception as e:
                 socketio.emit('scraping_error', {'message': str(e)})
             finally:
