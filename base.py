@@ -947,6 +947,12 @@ class Udemy:
         # s = cloudscraper.CloudScraper()
         logger.info("Trying to login with email and password")
         s = requests.session()
+        
+        # Use proxy if available (for cloud deployment)
+        proxy_url = os.environ.get('PROXY_URL')
+        if proxy_url:
+            s.proxies = {'http': proxy_url, 'https': proxy_url}
+            logger.info("Using proxy for requests")
         r = s.get(
             "https://www.udemy.com/join/signup-popup/?locale=en_US&response_type=html&next=https%3A%2F%2Fwww.udemy.com%2Flogout%2F",
             headers={"User-Agent": "okhttp/4.9.2 UdemyAndroid 8.9.2(499) (phone)"},
@@ -997,11 +1003,24 @@ class Udemy:
             }
         )
         s = cloudscraper.create_scraper(sess=s)
-        r = s.post(
-            "https://www.udemy.com/join/login-popup/?passwordredirect=True&response_type=json",
-            data=data,
-            allow_redirects=False,
-        )
+        
+        # Retry login with exponential backoff
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                r = s.post(
+                    "https://www.udemy.com/join/login-popup/?passwordredirect=True&response_type=json",
+                    data=data,
+                    allow_redirects=False,
+                    timeout=30
+                )
+                break
+            except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
+                if attempt == max_retries - 1:
+                    raise LoginException(f"Connection failed after {max_retries} attempts: {str(e)}")
+                wait_time = (2 ** attempt) + random.uniform(0, 1)
+                logger.info(f"Login attempt {attempt + 1} failed, retrying in {wait_time:.1f}s")
+                time.sleep(wait_time)
         if r.text.__contains__("returnUrl"):
             # Check if required cookies are present
             if "client_id" not in r.cookies or "access_token" not in r.cookies:
