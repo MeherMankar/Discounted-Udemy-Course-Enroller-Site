@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discounted Udemy Course Enroller</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 0;
+        }
+        .stats-card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        .progress-container {
+            display: none;
+        }
+        .course-item {
+            border-left: 4px solid #007bff;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+        }
+        .site-checkbox {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-graduation-cap"></i> DUCE Web
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text" id="userInfo" style="display: none;">
+                    Welcome, <span id="userName"></span>
+                    <a href="/logout" class="btn btn-outline-light btn-sm ms-2">Logout</a>
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="container text-center">
+            <h1 class="display-4 mb-4">
+                <i class="fas fa-graduation-cap"></i>
+                Discounted Udemy Course Enroller
+            </h1>
+            <p class="lead">Automatically enroll in free and discounted Udemy courses</p>
+        </div>
+    </div>
+
+    <div class="container mt-5">
+        <!-- Login Section -->
+        <div id="loginSection" class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-sign-in-alt"></i> Login to Udemy</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="loginForm">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </button>
+                        </form>
+                        <div id="loginMessage" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Application -->
+        <div id="mainApp" style="display: none;">
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-2">
+                    <div class="card stats-card text-center">
+                        <div class="card-body">
+                            <h5 class="text-success" id="enrolledCount">0</h5>
+                            <small>Enrolled</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card stats-card text-center">
+                        <div class="card-body">
+                            <h5 class="text-info" id="alreadyEnrolledCount">0</h5>
+                            <small>Already Enrolled</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card stats-card text-center">
+                        <div class="card-body">
+                            <h5 class="text-danger" id="expiredCount">0</h5>
+                            <small>Expired</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card stats-card text-center">
+                        <div class="card-body">
+                            <h5 class="text-warning" id="excludedCount">0</h5>
+                            <small>Excluded</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stats-card text-center">
+                        <div class="card-body">
+                            <h5 class="text-success" id="amountSaved">$0</h5>
+                            <small>Amount Saved</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-cog"></i> Site Selection</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="siteSelection">
+                                <div class="site-checkbox">
+                                    <input type="checkbox" id="realDiscount" value="Real Discount" checked>
+                                    <label for="realDiscount">Real Discount</label>
+                                </div>
+                                <div class="site-checkbox">
+                                    <input type="checkbox" id="courson" value="Courson" checked>
+                                    <label for="courson">Courson</label>
+                                </div>
+                                <div class="site-checkbox">
+                                    <input type="checkbox" id="idownloadcoupons" value="IDownloadCoupons" checked>
+                                    <label for="idownloadcoupons">IDownloadCoupons</label>
+                                </div>
+                                <div class="site-checkbox">
+                                    <input type="checkbox" id="enext" value="E-next" checked>
+                                    <label for="enext">E-next</label>
+                                </div>
+                                <div class="site-checkbox">
+                                    <input type="checkbox" id="discudemy" value="Discudemy" checked>
+                                    <label for="discudemy">Discudemy</label>
+                                </div>
+                                <div class="site-checkbox">
+                                    <input type="checkbox" id="udemyFreebies" value="Udemy Freebies" checked>
+                                    <label for="udemyFreebies">Udemy Freebies</label>
+                                </div>
+                                <div class="site-checkbox">
+                                    <input type="checkbox" id="courseJoiner" value="Course Joiner" checked>
+                                    <label for="courseJoiner">Course Joiner</label>
+                                </div>
+                                <div class="site-checkbox">
+                                    <input type="checkbox" id="courseVania" value="Course Vania" checked>
+                                    <label for="courseVania">Course Vania</label>
+                                </div>
+                            </div>
+                            <button id="scrapeBtn" class="btn btn-info w-100 mt-3">
+                                <i class="fas fa-search"></i> Start Scraping
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-list"></i> Progress & Status</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="statusMessage" class="alert alert-info">
+                                Ready to start. Please select sites and click "Start Scraping".
+                            </div>
+                            
+                            <!-- Scraping Progress -->
+                            <div id="scrapingProgress" class="progress-container">
+                                <h6>Scraping Progress</h6>
+                                <div class="progress mb-3">
+                                    <div id="scrapingProgressBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <div id="scrapingDetails"></div>
+                            </div>
+
+                            <!-- Enrollment Progress -->
+                            <div id="enrollmentProgress" class="progress-container">
+                                <h6>Enrollment Progress</h6>
+                                <div class="progress mb-3">
+                                    <div id="enrollmentProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <div id="enrollmentDetails">
+                                    <p><strong>Current Course:</strong> <span id="currentCourse">N/A</span></p>
+                                    <p><strong>Progress:</strong> <span id="courseProgress">0 / 0</span></p>
+                                </div>
+                            </div>
+
+                            <button id="enrollBtn" class="btn btn-success w-100" style="display: none;">
+                                <i class="fas fa-play"></i> Start Enrollment
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let isLoggedIn = false;
+
+        // Check login status on page load
+        fetch('/status')
+            .then(response => response.json())
+            .then(data => {
+                if (data.logged_in) {
+                    showMainApp(data.user_name);
+                }
+            });
+
+        // Login form handler
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('loginMessage', data.message, 'success');
+                    setTimeout(() => {
+                        showMainApp(data.user_name);
+                    }, 1000);
+                } else {
+                    showMessage('loginMessage', data.message, 'danger');
+                }
+            } catch (error) {
+                showMessage('loginMessage', 'Login failed: ' + error.message, 'danger');
+            }
+        });
+
+        // Scraping button handler
+        document.getElementById('scrapeBtn').addEventListener('click', async () => {
+            const selectedSites = Array.from(document.querySelectorAll('#siteSelection input:checked'))
+                .map(cb => cb.value);
+            
+            if (selectedSites.length === 0) {
+                showMessage('statusMessage', 'Please select at least one site', 'warning');
+                return;
+            }
+
+            try {
+                const response = await fetch('/scrape', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ sites: selectedSites })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('scrapingProgress').style.display = 'block';
+                    document.getElementById('scrapeBtn').disabled = true;
+                    showMessage('statusMessage', 'Scraping started...', 'info');
+                } else {
+                    showMessage('statusMessage', data.message, 'danger');
+                }
+            } catch (error) {
+                showMessage('statusMessage', 'Scraping failed: ' + error.message, 'danger');
+            }
+        });
+
+        // Enrollment button handler
+        document.getElementById('enrollBtn').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/enroll', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('enrollmentProgress').style.display = 'block';
+                    document.getElementById('enrollBtn').disabled = true;
+                    showMessage('statusMessage', 'Enrollment started...', 'info');
+                } else {
+                    showMessage('statusMessage', data.message, 'danger');
+                }
+            } catch (error) {
+                showMessage('statusMessage', 'Enrollment failed: ' + error.message, 'danger');
+            }
+        });
+
+        // Socket event handlers
+        socket.on('scraping_progress', (data) => {
+            updateScrapingProgress(data);
+        });
+
+        socket.on('scraping_complete', (data) => {
+            document.getElementById('scrapeBtn').disabled = false;
+            document.getElementById('enrollBtn').style.display = 'block';
+            showMessage('statusMessage', data.message, 'success');
+        });
+
+        socket.on('scraping_error', (data) => {
+            document.getElementById('scrapeBtn').disabled = false;
+            showMessage('statusMessage', 'Scraping error: ' + data.message, 'danger');
+        });
+
+        socket.on('enrollment_progress', (data) => {
+            updateEnrollmentProgress(data);
+            updateStats(data);
+        });
+
+        socket.on('enrollment_complete', (data) => {
+            document.getElementById('enrollBtn').disabled = false;
+            showMessage('statusMessage', 'Enrollment completed!', 'success');
+            updateStats(data);
+        });
+
+        socket.on('enrollment_error', (data) => {
+            document.getElementById('enrollBtn').disabled = false;
+            showMessage('statusMessage', 'Enrollment error: ' + data.message, 'danger');
+        });
+
+        // Helper functions
+        function showMainApp(userName) {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            document.getElementById('userInfo').style.display = 'block';
+            document.getElementById('userName').textContent = userName;
+            isLoggedIn = true;
+        }
+
+        function showMessage(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        }
+
+        function updateScrapingProgress(data) {
+            const progress = data.total > 0 ? (data.progress / data.total) * 100 : 0;
+            document.getElementById('scrapingProgressBar').style.width = progress + '%';
+            document.getElementById('scrapingDetails').innerHTML = `
+                <small>${data.site}: ${data.progress}/${data.total}</small>
+            `;
+        }
+
+        function updateEnrollmentProgress(data) {
+            const progress = data.total_courses > 0 ? (data.current_course / data.total_courses) * 100 : 0;
+            document.getElementById('enrollmentProgressBar').style.width = progress + '%';
+            document.getElementById('currentCourse').textContent = data.current_course_title;
+            document.getElementById('courseProgress').textContent = `${data.current_course} / ${data.total_courses}`;
+        }
+
+        function updateStats(data) {
+            document.getElementById('enrolledCount').textContent = data.successfully_enrolled;
+            document.getElementById('alreadyEnrolledCount').textContent = data.already_enrolled;
+            document.getElementById('expiredCount').textContent = data.expired;
+            document.getElementById('excludedCount').textContent = data.excluded;
+            document.getElementById('amountSaved').textContent = `${data.amount_saved.toFixed(2)} ${data.currency}`;
+        }
+    </script>
+    
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+        <div class="container">
+            <p class="mb-0">Made with ❤️ by <a href="https://t.me/meher_mankar" target="_blank" class="text-decoration-none text-info">Meher Mankar</a></p>
+        </div>
+    </footer>
+</body>
+</html>

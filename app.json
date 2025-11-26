@@ -1,0 +1,17 @@
+{
+  "name": "Udemy Course Enroller",
+  "description": "Automatically enroll in free and discounted Udemy courses",
+  "repository": "https://github.com/yourusername/udemy-course-enroller",
+  "keywords": ["udemy", "education", "courses", "automation"],
+  "env": {
+    "SECRET_KEY": {
+      "description": "Secret key for Flask sessions",
+      "generator": "secret"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ]
+}
