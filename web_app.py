@@ -23,21 +23,59 @@ scraping_thread = None
 def index():
     return render_template('index.html')
 
+@app.route('/cookie-help')
+def cookie_help():
+    help_text = """
+    <h2>How to Get Udemy Cookies</h2>
+    <ol>
+        <li>Login to Udemy in your browser</li>
+        <li>Press F12 to open Developer Tools</li>
+        <li>Go to Application/Storage tab</li>
+        <li>Click on Cookies → https://www.udemy.com</li>
+        <li>Copy these values:
+            <ul>
+                <li><strong>client_id</strong></li>
+                <li><strong>access_token</strong></li>
+                <li><strong>csrftoken</strong> (use as csrf_token)</li>
+            </ul>
+        </li>
+        <li>Use Cookie Login method in the app</li>
+    </ol>
+    <p><strong>Note:</strong> Cookies expire after some time, you may need to refresh them.</p>
+    """
+    return help_text
+
 @app.route('/login', methods=['POST'])
 def login():
     global udemy_instance
     try:
         data = request.get_json()
-        email = data.get('email')
-        password = data.get('password')
-        
-        if not email or not password:
-            return jsonify({'success': False, 'message': 'Email and password are required'})
+        login_method = data.get('method', 'password')
         
         udemy_instance = Udemy("web", debug=False)
         udemy_instance.load_settings()
-        udemy_instance.manual_login(email, password)
-        udemy_instance.get_session_info()
+        
+        if login_method == 'cookies':
+            # Cookie-based login
+            client_id = data.get('client_id')
+            access_token = data.get('access_token')
+            csrf_token = data.get('csrf_token')
+            
+            if not all([client_id, access_token, csrf_token]):
+                return jsonify({'success': False, 'message': 'All cookie values (client_id, access_token, csrf_token) are required'})
+            
+            udemy_instance.make_cookies(client_id, access_token, csrf_token)
+            udemy_instance.get_session_info()
+        else:
+            # Email/password login
+            email = data.get('email')
+            password = data.get('password')
+            
+            if not email or not password:
+                return jsonify({'success': False, 'message': 'Email and password are required'})
+            
+            udemy_instance.manual_login(email, password)
+            udemy_instance.get_session_info()
         
         session['logged_in'] = True
         session['user_name'] = udemy_instance.display_name

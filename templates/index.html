@@ -64,25 +64,68 @@
     <div class="container mt-5">
         <!-- Login Section -->
         <div id="loginSection" class="row justify-content-center">
-            <div class="col-md-6">
+            <div class="col-md-8">
                 <div class="card">
                     <div class="card-header bg-primary text-white">
                         <h5 class="mb-0"><i class="fas fa-sign-in-alt"></i> Login to Udemy</h5>
                     </div>
                     <div class="card-body">
-                        <form id="loginForm">
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" required>
+                        <!-- Login Method Tabs -->
+                        <ul class="nav nav-tabs mb-3" id="loginTabs">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="password-tab" data-bs-toggle="tab" href="#passwordLogin">Password</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="cookie-tab" data-bs-toggle="tab" href="#cookieLogin">Cookies</a>
+                            </li>
+                        </ul>
+                        
+                        <div class="tab-content">
+                            <!-- Password Login -->
+                            <div class="tab-pane fade show active" id="passwordLogin">
+                                <form id="loginForm">
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="email">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="password">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-sign-in-alt"></i> Login with Password
+                                    </button>
+                                </form>
+                                <div class="alert alert-warning mt-3">
+                                    <small><i class="fas fa-exclamation-triangle"></i> Password login may not work on cloud hosting. Try Cookie login instead.</small>
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="password" required>
+                            
+                            <!-- Cookie Login -->
+                            <div class="tab-pane fade" id="cookieLogin">
+                                <form id="cookieForm">
+                                    <div class="mb-3">
+                                        <label for="client_id" class="form-label">Client ID</label>
+                                        <input type="text" class="form-control" id="client_id" placeholder="From browser cookies">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="access_token" class="form-label">Access Token</label>
+                                        <input type="text" class="form-control" id="access_token" placeholder="From browser cookies">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="csrf_token" class="form-label">CSRF Token</label>
+                                        <input type="text" class="form-control" id="csrf_token" placeholder="csrftoken from browser">
+                                    </div>
+                                    <button type="submit" class="btn btn-success w-100">
+                                        <i class="fas fa-cookie-bite"></i> Login with Cookies
+                                    </button>
+                                </form>
+                                <div class="alert alert-info mt-3">
+                                    <small><a href="/cookie-help" target="_blank"><i class="fas fa-question-circle"></i> How to get cookies?</a></small>
+                                </div>
                             </div>
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="fas fa-sign-in-alt"></i> Login
-                            </button>
-                        </form>
+                        </div>
+                        
                         <div id="loginMessage" class="mt-3"></div>
                     </div>
                 </div>
@@ -240,7 +283,7 @@
                 }
             });
 
-        // Login form handler
+        // Password login form handler
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -253,7 +296,39 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ email, password })
+                    body: JSON.stringify({ method: 'password', email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('loginMessage', data.message, 'success');
+                    setTimeout(() => {
+                        showMainApp(data.user_name);
+                    }, 1000);
+                } else {
+                    showMessage('loginMessage', data.message, 'danger');
+                }
+            } catch (error) {
+                showMessage('loginMessage', 'Login failed: ' + error.message, 'danger');
+            }
+        });
+        
+        // Cookie login form handler
+        document.getElementById('cookieForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const client_id = document.getElementById('client_id').value;
+            const access_token = document.getElementById('access_token').value;
+            const csrf_token = document.getElementById('csrf_token').value;
+            
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ method: 'cookies', client_id, access_token, csrf_token })
                 });
                 
                 const data = await response.json();
