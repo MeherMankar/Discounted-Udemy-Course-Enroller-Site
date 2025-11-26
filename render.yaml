@@ -3,11 +3,15 @@ services:
     name: udemy-course-enroller
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --workers 1 --timeout 120 --max-requests 100 --max-requests-jitter 10 wsgi:app
+    startCommand: gunicorn --workers 1 --timeout 60 --max-requests 50 --max-requests-jitter 5 --worker-class sync --worker-connections 10 --preload wsgi:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: SECRET_KEY
         generateValue: true
       - key: PROXY_URL
-        value: ""  # Add proxy URL here if needed
+        value: ""
+      - key: WEB_CONCURRENCY
+        value: "1"
+      - key: PYTHONUNBUFFERED
+        value: "1"

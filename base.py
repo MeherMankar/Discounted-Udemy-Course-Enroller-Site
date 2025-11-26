@@ -294,14 +294,14 @@ class Scraper:
                 "referer": "https://www.discudemy.com",
             }
 
-            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                 future_page = [
                     executor.submit(
                         self.fetch_page,
                         f"https://www.discudemy.com/all/{page}",
                         headers=head,
                     )
-                    for page in range(1, 11)
+                    for page in range(1, 4)
                 ]
                 self.set_attr("length", 11)
 
@@ -327,10 +327,10 @@ class Scraper:
                 link = soup.find("div", {"class": "ui segment"}).a["href"]
                 return title, link
 
-            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                 future_course_details = [
                     executor.submit(_fetch_course_details, item, head)
-                    for item in all_items
+                    for item in all_items[:30]
                 ]
                 for i, future in enumerate(
                     concurrent.futures.as_completed(future_course_details)
@@ -349,14 +349,14 @@ class Scraper:
         try:
             all_items = []
 
-            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                 self.set_attr("length", 5)
                 future_page = [
                     executor.submit(
                         self.fetch_page,
                         f"https://www.udemyfreebies.com/free-udemy-courses/{page}",
                     )
-                    for page in range(1, 6)
+                    for page in range(1, 4)
                 ]
                 for i, future in enumerate(
                     concurrent.futures.as_completed(future_page)
@@ -377,9 +377,9 @@ class Scraper:
 
             self.set_attr("length", len(all_items))
 
-            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                 future_course_details = [
-                    executor.submit(_fetch_course_details, item) for item in all_items
+                    executor.submit(_fetch_course_details, item) for item in all_items[:30]
                 ]
                 for i, future in enumerate(
                     concurrent.futures.as_completed(future_course_details)
@@ -399,13 +399,13 @@ class Scraper:
         try:
             all_items = []
             self.set_attr("length", 5)
-            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                 future_page = [
                     executor.submit(
                         self.fetch_page,
                         f"https://www.tutorialbar.com/wp-json/wp/v2/posts?categories=55&per_page=100&page={page}",
                     )
-                    for page in range(1, 6)
+                    for page in range(1, 4)
                 ]
                 for i, future in enumerate(
                     concurrent.futures.as_completed(future_page)
@@ -501,7 +501,7 @@ class Scraper:
                 )["href"]
                 return title, link
 
-            with concurrent.futures.ThreadPoolExecutor(max_workers=30) as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                 future_course_details = [
                     executor.submit(_fetch_course_details, item) for item in page_items
                 ]
@@ -524,7 +524,7 @@ class Scraper:
             all_items = []
             self.set_attr("length", 3)
 
-            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                 future_page = [
                     executor.submit(
                         self.fetch_page,
@@ -566,9 +566,9 @@ class Scraper:
                 link = self.cleanup_link(link)
                 return title, link
 
-            with concurrent.futures.ThreadPoolExecutor(max_workers=7) as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                 future_course_details = [
-                    executor.submit(_fetch_course_details, item) for item in all_items
+                    executor.submit(_fetch_course_details, item) for item in all_items[:30]
                 ]
                 for i, future in enumerate(
                     concurrent.futures.as_completed(future_course_details)
@@ -585,13 +585,13 @@ class Scraper:
         try:
             all_items = []
             self.set_attr("length", 5)
-            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                 future_page = [
                     executor.submit(
                         self.fetch_page,
                         f"https://jobs.e-next.in/course/udemy/{page}",
                     )
-                    for page in range(1, 6)
+                    for page in range(1, 4)
                 ]
                 for i, future in enumerate(
                     concurrent.futures.as_completed(future_page)
@@ -605,13 +605,13 @@ class Scraper:
                     self.set_attr("progress", i + 1)
 
             self.set_attr("length", len(all_items))
-            with concurrent.futures.ThreadPoolExecutor(max_workers=7) as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                 future_course_details = [
                     executor.submit(
                         self.fetch_page,
                         item["href"],
                     )
-                    for item in all_items
+                    for item in all_items[:30]
                 ]
                 for i, future in enumerate(
                     concurrent.futures.as_completed(future_course_details)
@@ -654,7 +654,7 @@ class Scraper:
                 # Requests doesn't support trailers
                 # 'TE': 'trailers',
             }
-            with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                 future_page = [
                     executor.submit(
                         self.fetch_page,
@@ -696,14 +696,14 @@ class Scraper:
     def cxyz(self):
         try:
             self.set_attr("length", 10)
-            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                 future_page = [
                     executor.submit(
                         requests.post,
                         f"https://courson.xyz/load-more-coupons",
                         json={"filters": {}, "offset": (page - 1) * 30},
                     )
-                    for page in range(1, 11)
+                    for page in range(1, 4)
                 ]
                 for i, future in enumerate(
                     concurrent.futures.as_completed(future_page)

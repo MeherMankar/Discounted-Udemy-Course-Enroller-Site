@@ -231,6 +231,11 @@ def status():
         'enrollment_active': enrollment_thread and enrollment_thread.is_alive() if enrollment_thread else False
     })
 
+
+@app.route('/keepalive')
+def keepalive():
+    return jsonify({'status': 'alive', 'timestamp': time.time()})
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     socketio.run(app, debug=False, host='0.0.0.0', port=port)
