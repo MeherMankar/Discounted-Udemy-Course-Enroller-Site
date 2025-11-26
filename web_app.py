@@ -3,6 +3,7 @@ from flask_socketio import SocketIO, emit
 import threading
 import time
 import os
+import gc
 from base import Udemy, Scraper, LoginException, scraper_dict
 import logging
 
@@ -114,6 +115,9 @@ def start_scraping():
                 })
             except Exception as e:
                 socketio.emit('scraping_error', {'message': str(e)})
+            finally:
+                # Clean up memory
+                gc.collect()
         
         scraping_thread = threading.Thread(target=scraping_worker, daemon=True)
         scraping_thread.start()
@@ -182,6 +186,9 @@ def start_enrollment():
                 
             except Exception as e:
                 socketio.emit('enrollment_error', {'message': str(e)})
+            finally:
+                # Clean up memory
+                gc.collect()
         
         enrollment_thread = threading.Thread(target=enrollment_worker, daemon=True)
         enrollment_thread.start()
