@@ -8,5 +8,5 @@ pyopenssl
 loguru
 lxml
 python-socketio==5.8.0
-eventlet==0.33.3
+eventlet==0.35.2
 gunicorn==21.2.0

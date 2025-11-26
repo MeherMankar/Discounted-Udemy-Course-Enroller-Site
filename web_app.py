@@ -12,7 +12,7 @@ log.setLevel(logging.ERROR)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-change-in-production')
-socketio = SocketIO(app, cors_allowed_origins="*", logger=False, engineio_logger=False)
+socketio = SocketIO(app, cors_allowed_origins="*", logger=False, engineio_logger=False, async_mode='threading')
 
 # Global variables to store application state
 udemy_instance = None
@@ -231,6 +231,19 @@ def logout():
 @app.route('/status')
 def status():
     return jsonify({
+        'logged_in': session.get('logged_in', False),
+        'user_name': session.get('user_name', ''),
+        'scraping_active': scraping_thread and scraping_thread.is_alive() if scraping_thread else False,
+        'enrollment_active': enrollment_thread and enrollment_thread.is_alive() if enrollment_thread else False
+    })
+
+@app.route('/keepalive')
+def keepalive():
+    return jsonify({'status': 'alive', 'timestamp': time.time()})
+
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    socketio.run(app, debug=True, host='0.0.0.0', port=port)
         'logged_in': session.get('logged_in', False),
         'user_name': session.get('user_name', ''),
         'scraping_active': scraping_thread and scraping_thread.is_alive() if scraping_thread else False,
