@@ -107,16 +107,23 @@ def start_scraping():
         
         def scraping_worker():
             try:
+                # Limit sites to prevent memory issues
+                limited_sites = selected_sites[:3]  # Max 3 sites
+                scraper_instance.sites = limited_sites
+                
                 scraped_data = scraper_instance.get_scraped_courses(scrape_site_worker)
-                udemy_instance.scraped_data = scraped_data
+                udemy_instance.scraped_data = scraped_data[:100]  # Limit to 100 courses
+                
                 socketio.emit('scraping_complete', {
-                    'total_courses': len(scraped_data),
-                    'message': f'Found {len(scraped_data)} courses'
+                    'total_courses': len(udemy_instance.scraped_data),
+                    'message': f'Found {len(udemy_instance.scraped_data)} courses'
                 })
             except Exception as e:
                 socketio.emit('scraping_error', {'message': str(e)})
             finally:
                 # Clean up memory
+                if 'scraped_data' in locals():
+                    del scraped_data
                 gc.collect()
         
         scraping_thread = threading.Thread(target=scraping_worker, daemon=True)
@@ -230,6 +237,10 @@ def status():
         'scraping_active': scraping_thread and scraping_thread.is_alive() if scraping_thread else False,
         'enrollment_active': enrollment_thread and enrollment_thread.is_alive() if enrollment_thread else False
     })
+
+@app.route('/keepalive')
+def keepalive():
+    return jsonify({'status': 'alive', 'timestamp': time.time()})
 
 
 @app.route('/keepalive')
