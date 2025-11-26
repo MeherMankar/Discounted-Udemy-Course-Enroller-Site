@@ -107,12 +107,11 @@ def start_scraping():
         
         def scraping_worker():
             try:
-                # Limit sites to prevent memory issues
-                limited_sites = selected_sites[:3]  # Max 3 sites
-                scraper_instance.sites = limited_sites
+                # Process all selected sites but limit data per site
+                scraper_instance.sites = selected_sites
                 
                 scraped_data = scraper_instance.get_scraped_courses(scrape_site_worker)
-                udemy_instance.scraped_data = scraped_data[:100]  # Limit to 100 courses
+                udemy_instance.scraped_data = scraped_data[:200]  # Limit to 200 courses
                 
                 socketio.emit('scraping_complete', {
                     'total_courses': len(udemy_instance.scraped_data),
