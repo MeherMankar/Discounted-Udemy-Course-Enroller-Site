@@ -178,6 +178,17 @@ def start_enrollment():
                         'current_course_title': udemy_instance.course.title if hasattr(udemy_instance, 'course') and udemy_instance.course else 'N/A'
                     })
                 
+                # Initialize required attributes before enrollment
+                udemy_instance.categories = [
+                    key for key, value in udemy_instance.settings["categories"].items() if value
+                ]
+                udemy_instance.languages = [
+                    key for key, value in udemy_instance.settings["languages"].items() if value
+                ]
+                udemy_instance.instructor_exclude = udemy_instance.settings["instructor_exclude"]
+                udemy_instance.title_exclude = udemy_instance.settings["title_exclude"]
+                udemy_instance.min_rating = udemy_instance.settings["min_rating"]
+                
                 udemy_instance.update_progress = update_progress
                 udemy_instance.start_new_enroll()
                 
