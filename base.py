@@ -966,9 +966,10 @@ class Udemy:
         )
         try:
             csrf_token = r.cookies["csrftoken"]
-        except:
-            if self.debug:
-                logger.error(r.text)
+        except KeyError:
+            logger.error(f"CSRF token not found. Status: {r.status_code}")
+            logger.error(f"Response: {r.text[:200]}...")
+            raise LoginException("Failed to get CSRF token from Udemy")
         data = {
             "csrfmiddlewaretoken": csrf_token,
             "locale": "en_US",
@@ -1022,8 +1023,19 @@ class Udemy:
                         raise LoginException(login_error)
                 else:
                     raise LoginException("Login failed: Invalid response from Udemy")
-            except (KeyError, IndexError, ValueError):
-                raise LoginException("Login failed: Unable to parse Udemy response")
+            except (KeyError, IndexError, ValueError) as e:
+                logger.error(f"JSON parsing error: {e}")
+                logger.error(f"Response status: {r.status_code}")
+                logger.error(f"Response headers: {dict(r.headers)}")
+                logger.error(f"Response content: {r.text[:500]}...")
+                if r.status_code == 403:
+                    raise LoginException("Access blocked by Udemy. Try using a VPN or different network.")
+                elif r.status_code == 429:
+                    raise LoginException("Too many requests. Please wait and try again later.")
+                elif "cloudflare" in r.text.lower():
+                    raise LoginException("Cloudflare protection detected. Server IP may be blocked.")
+                else:
+                    raise LoginException(f"Login failed: Unable to parse Udemy response (Status: {r.status_code})")
 
     def get_session_info(self):
         """Get Session info
