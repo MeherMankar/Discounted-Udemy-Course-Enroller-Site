@@ -953,9 +953,29 @@ class Udemy:
         if proxy_url:
             s.proxies = {'http': proxy_url, 'https': proxy_url}
             logger.info("Using proxy for requests")
+        
+        # More realistic browser headers to avoid detection
+        realistic_headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Accept-Encoding": "gzip, deflate, br",
+            "DNT": "1",
+            "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Cache-Control": "max-age=0"
+        }
+        
+        # Add random delay to simulate human behavior
+        time.sleep(random.uniform(1, 3))
+        
         r = s.get(
             "https://www.udemy.com/join/signup-popup/?locale=en_US&response_type=html&next=https%3A%2F%2Fwww.udemy.com%2Flogout%2F",
-            headers={"User-Agent": "okhttp/4.9.2 UdemyAndroid 8.9.2(499) (phone)"},
+            headers=realistic_headers,
             # headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/119.0",
             #     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
             #     'Accept-Language': 'en-US,en;q=0.5',
@@ -985,11 +1005,15 @@ class Udemy:
 
         # ss = requests.session()
         s.cookies.update(r.cookies)
+        # Add another delay before login attempt
+        time.sleep(random.uniform(2, 4))
+        
         s.headers.update(
             {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
                 "Accept": "application/json, text/plain, */*",
                 "Accept-Language": "en-US,en;q=0.9",
+                "Accept-Encoding": "gzip, deflate, br",
                 "Referer": "https://www.udemy.com/join/login-popup/?passwordredirect=True&response_type=json",
                 "Origin": "https://www.udemy.com",
                 "DNT": "1",
@@ -999,7 +1023,8 @@ class Udemy:
                 "Sec-Fetch-Site": "same-origin",
                 "Sec-Ch-Ua": '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
                 "Sec-Ch-Ua-Mobile": "?0",
-                "Sec-Ch-Ua-Platform": '"Windows"'
+                "Sec-Ch-Ua-Platform": '"Windows"',
+                "X-Requested-With": "XMLHttpRequest"
             }
         )
         s = cloudscraper.create_scraper(sess=s)
