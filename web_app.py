@@ -244,21 +244,3 @@ def keepalive():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     socketio.run(app, debug=True, host='0.0.0.0', port=port)
-        'logged_in': session.get('logged_in', False),
-        'user_name': session.get('user_name', ''),
-        'scraping_active': scraping_thread and scraping_thread.is_alive() if scraping_thread else False,
-        'enrollment_active': enrollment_thread and enrollment_thread.is_alive() if enrollment_thread else False
-    })
-
-@app.route('/keepalive')
-def keepalive():
-    return jsonify({'status': 'alive', 'timestamp': time.time()})
-
-
-@app.route('/keepalive')
-def keepalive():
-    return jsonify({'status': 'alive', 'timestamp': time.time()})
-
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    socketio.run(app, debug=False, host='0.0.0.0', port=port)
